@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Countdown Timer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .countdown-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card {
+            height: 250px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Countdown Timer</h1>
+    <div class="countdown-container mt-5">
+        <form id="countdown_form">
+            <div class="form-group">
+                <label for="countdown_date">Date:</label>
+                <input type="date" class="form-control" id="countdown_date" name="countdown_date" required>
+            </div>
+            <div class="form-group">
+                <label for="countdown_time">Time:</label>
+                <input type="time" class="form-control" id="countdown_time" name="countdown_time" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Start Countdown</button>
+        </form>
+    </div>
+
+    <div class="row mt-5" id="timers_container">
+        <!-- Timer cards will be dynamically added here -->
+    </div>
+
+</div>
+
+<script>
+   let timers = [];
+
+
+
+    document.getElementById("countdown_form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const countdownDate = formData.get("countdown_date");
+        const countdownTime = formData.get("countdown_time");
+        const countdownDateTime = `${countdownDate} ${countdownTime}`;
+        addCountdownTimer(countdownDateTime);
+    });
+
+     function addCountdownTimer(countdownDateTime) {
+        const timer = { countdownDate: countdownDateTime, timerElement: null };
+        timers.push(timer);
+
+        const container = document.getElementById("timers_container");
+        const timerCard = document.createElement("div");
+        timerCard.classList.add("col-md-4", "mb-4");
+        const endDateTime = new Date(countdownDateTime).toLocaleString();
+        timerCard.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Timer ${timers.length}</h5>
+                    <p class="card-text">End Date and Time: ${endDateTime}</p>
+                    <h3 class="card-text" id="timer_${timers.length}"></h3>
+                    <button class="btn btn-danger" onclick="deleteTimer(${timers.length - 1})">Delete</button>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(timerCard);
+
+        startCountdown(timers.length - 1); // Start countdown for the newly added timer
+        // Save timers to the server each time a new timer is added
+        saveTimersToServer();
+    }
+
+    function deleteTimer(index) {
+        const timerCard = document.getElementById(`timer_${index + 1}`);
+        timerCard.remove(); // Remove the entire timer card and its content from the DOM
+        clearInterval(timers[index].countdownInterval);
+        timers.splice(index, 1);
+        updateTimerTitles(); // Update the Timer titles after deletion
+
+        const container = document.getElementById("timers_container");
+        container.innerHTML = ''; // Clear all existing cards
+
+        // Re-add cards for active timers
+        timers.forEach((timer, index) => {
+            const timerCard = document.createElement("div");
+            timerCard.classList.add("col-md-4", "mb-4");
+            const endDateTime = new Date(timer.countdownDate).toLocaleString();
+            timerCard.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Timer ${index + 1}</h5>
+                        <p class="card-text">End Date and Time: ${endDateTime}</p>
+                        <h3 class="card-text" id="timer_${index + 1}"></h3>
+                        <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(timerCard);
+
+            startCountdown(index); // Restart countdown for the remaining timers
+                    // Save timers to the server each time a timer is deleted
+        saveTimersToServer();
+        });
+
+        removeEmptyCards(); // Remove any empty cards from the DOM
+    }
+
+    function removeEmptyCards() {
+        const container = document.getElementById("timers_container");
+        const cards = container.getElementsByClassName("card");
+        for (let i = cards.length - 1; i >= 0; i--) {
+            const timerText = cards[i].querySelector("h3").textContent.trim();
+            if (!timerText) {
+                cards[i].remove();
+            }
+        }
+    }
+
+    function updateTimerTitles() {
+        const timerCards = document.getElementsByClassName("card-title");
+        for (let i = 0; i < timerCards.length; i++) {
+            timerCards[i].innerText = `Timer ${i + 1}`;
+        }
+    }
+
+    function startCountdown(index) {
+        const countdownDate = new Date(timers[index].countdownDate).getTime();
+        const timerElement = document.getElementById(`timer_${index + 1}`);
+        timers[index].timerElement = timerElement;
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = countdownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerElement.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+            if (distance < 0) {
+                clearInterval(timers[index].countdownInterval);
+                timerElement.innerHTML = "EXPIRED";
+            }
+        }
+
+        updateCountdown();
+        timers[index].countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+ // Function to display timers on the web page
+    function displayTimers() {
+        const container = document.getElementById("timers_container");
+        container.innerHTML = '';
+
+        timers.forEach((timer, index) => {
+            const timerCard = document.createElement("div");
+            timerCard.classList.add("col-md-4", "mb-4");
+            const endDateTime = new Date(timer.countdownDate).toLocaleString();
+            timerCard.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Timer ${index + 1}</h5>
+                        <p class="card-text">End Date and Time: ${endDateTime}</p>
+                        <h3 class="card-text" id="timer_${index + 1}"></h3>
+                        <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(timerCard);
+            startCountdown(index);
+        });
+    }
+
+
+
+  // Function to save timers to the server using fetch API
+    function saveTimersToServer() {
+        fetch('/api/timers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ timers })
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error saving timers:', error));
+    }
+
+    // Function to load timers from the server using fetch API
+    function loadTimersFromServer() {
+        fetch('/api/timers')
+            .then(response => response.json())
+            .then(data => {
+                timers = data;
+                displayTimers(); // Display the loaded timers on the page
+            })
+            .catch(error => console.error('Error loading timers:', error));
+    }
+
+    // Load timers from the server on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTimersFromServer();
+    });
+
+
+</script>
+</body>
+</html>
