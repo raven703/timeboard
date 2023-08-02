@@ -1,0 +1,38 @@
+        .countdown-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card {
+            height: 250px;
+        }
+
+    #timer_name {
+        width: 100%;
+        max-width: 400px; /* Set the maximum width as needed */
+        font-size: 16px; /* Adjust font size as needed */
+        padding: 8px; /* Add padding to improve appearance */
+    }
+
+
+    /* Autocomplete styles */
+    #autocomplete_list {
+        position: absolute;
+        z-index: 1;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        width: calc(200% - 40px); /* Adjust width as needed */
+        font-size: 14px; /* Adjust font size as needed */
+    }
+
+    .autocomplete-item {
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .autocomplete-item:hover {
+        background-color: #e6e6e6;
+    }
+
