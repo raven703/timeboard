@@ -27,9 +27,21 @@
                 <label for="countdown_time">Time:</label>
                 <input type="time" class="form-control" id="countdown_time" name="countdown_time" required>
             </div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="timer_name">Timer Name:</label>
+            <input type="text" class="form-control" id="timer_name" placeholder="Enter timer name">
+        </div>
+    </div>
+</div>
+
+
             <button type="submit" class="btn btn-primary">Start Countdown</button>
         </form>
     </div>
+
 
     <div class="row mt-5" id="timers_container">
         <!-- Timer cards will be dynamically added here -->
@@ -51,30 +63,22 @@
         addCountdownTimer(countdownDateTime);
     });
 
-     function addCountdownTimer(countdownDateTime) {
-        const timer = { countdownDate: countdownDateTime, timerElement: null };
-        timers.push(timer);
+     // Function to add a countdown timer
+    function addCountdownTimer(countdownDateTime) {
+        // Get timer name from the input field
+        const timerNameInput = document.getElementById("timer_name");
+        const timerName = timerNameInput.value || "Timer";
 
-        const container = document.getElementById("timers_container");
-        const timerCard = document.createElement("div");
-        timerCard.classList.add("col-md-4", "mb-4");
-        const endDateTime = new Date(countdownDateTime).toLocaleString();
-        timerCard.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Timer ${timers.length}</h5>
-                    <p class="card-text">End Date and Time: ${endDateTime}</p>
-                    <h3 class="card-text" id="timer_${timers.length}"></h3>
-                    <button class="btn btn-danger" onclick="deleteTimer(${timers.length - 1})">Delete</button>
-                </div>
-            </div>
-        `;
+        const newTimer = {
+            name: timerName,
+            countdownDate: countdownDateTime,
+        };
 
-        container.appendChild(timerCard);
+        timers.push(newTimer);
 
-        startCountdown(timers.length - 1); // Start countdown for the newly added timer
-        // Save timers to the server each time a new timer is added
-        saveTimersToServer();
+        displayTimers(); // Display the timers on the page
+        saveTimersToServer(); // Save timers to the server, including the new timer
+        timerNameInput.value = ''; // Clear the input field after adding the timer
     }
 
     function deleteTimer(index) {
@@ -169,7 +173,7 @@
             timerCard.innerHTML = `
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Timer ${index + 1}</h5>
+                        <h5 class="card-title">${timer.name}</h5>
                         <p class="card-text">End Date and Time: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
