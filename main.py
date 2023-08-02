@@ -17,10 +17,19 @@ def load_timers():
             return json.load(file)
     return []
 
+def read_autocomplete_strings():
+    with open('autocomplete_strings.txt', 'r') as file:
+        return [line.strip() for line in file]
+
 @app.route('/')
 def index():
     timers = load_timers()  # Load timers from the server on page load
     return render_template('index.html', timers=timers)
+
+@app.route('/api/autocomplete', methods=['GET'])
+def autocomplete():
+    autocomplete_strings = read_autocomplete_strings()
+    return jsonify(autocomplete_strings), 200
 
 @app.route('/api/timers', methods=['GET', 'POST'])
 def timers():

@@ -35,7 +35,8 @@
     <div class="col-md-6">
         <div class="form-group">
             <label for="timer_name">Timer Name:</label>
-            <input type="text" class="form-control" id="timer_name" placeholder="Enter timer name">
+            <input type="text" class="form-control" id="timer_name" placeholder="Enter timer name" autocomplete="off">
+            <div id="autocomplete_list"></div>
         </div>
     </div>
 </div>
@@ -54,6 +55,36 @@
 
 <script>
    let timers = [];
+
+  function showAutocompleteSuggestions() {
+        const input = document.getElementById('timer_name');
+        const autocompleteList = document.getElementById('autocomplete_list');
+        autocompleteList.innerHTML = '';
+
+        // Fetch autocomplete suggestions from the server
+        fetch('/api/autocomplete')
+            .then(response => response.json())
+            .then(data => {
+                const suggestions = data;
+                const inputText = input.value.toLowerCase();
+
+                suggestions.forEach(suggestion => {
+                    if (suggestion.toLowerCase().startsWith(inputText)) {
+                        const suggestionItem = document.createElement('div');
+                        suggestionItem.classList.add('autocomplete-item');
+                        suggestionItem.innerText = suggestion;
+
+                        suggestionItem.addEventListener('click', () => {
+                            input.value = suggestion;
+                            autocompleteList.innerHTML = '';
+                        });
+
+                        autocompleteList.appendChild(suggestionItem);
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching autocomplete suggestions:', error));
+    }
 
 
 
@@ -214,6 +245,10 @@
             })
             .catch(error => console.error('Error loading timers:', error));
     }
+
+        document.getElementById('timer_name').addEventListener('input', () => {
+            showAutocompleteSuggestions();
+        });
 
     // Load timers from the server on page load
     document.addEventListener('DOMContentLoaded', () => {
