@@ -4,7 +4,6 @@ import os
 
 app = Flask(__name__)
 
-# ... existing functions ...
 
 # Function to save timers to a JSON file
 def save_timers(timers):
