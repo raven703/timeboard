@@ -42,7 +42,24 @@ def timers():
         timers = load_timers()
         return jsonify(timers), 200
 
+# Function to get the dropdown options for the structure_type field
+def get_structure_type_options():
+    options = [
+        "Astrahus",
+        "Raitaru",
+        "Athanor",
+        "Fortizar",
+        "Keepstar",
+        "Azbel",
+        "Sotiyo",
+        "Tatara"
+    ]
+    return options
 
+@app.route('/api/structure_type_options', methods=['GET'])
+def structure_type_options():
+    options = get_structure_type_options()
+    return jsonify(options), 200
 
 
 if __name__ == '__main__':

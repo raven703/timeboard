@@ -1,6 +1,28 @@
 
    let timers = [];
 
+    // Function to populate the structure_type dropdown
+function populateStructureTypeDropdown() {
+        const dropdown = document.getElementById('structure_type');
+
+        // Fetch dropdown options from the server
+        fetch('/api/structure_type_options')
+            .then(response => response.json())
+            .then(data => {
+                const options = data;
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.innerText = option;
+                    dropdown.appendChild(optionElement);
+                });
+            })
+            .catch(error => console.error('Error fetching dropdown options:', error));
+    }
+
+
+populateStructureTypeDropdown();
+
   function showAutocompleteSuggestions() {
         const input = document.getElementById('timer_name');
         const autocompleteList = document.getElementById('autocomplete_list');
@@ -48,10 +70,19 @@
         const timerNameInput = document.getElementById("timer_name");
         const timerName = timerNameInput.value || "Timer";
 
+        const structure_typeInput = document.getElementById("structure_type");
+        const structure_type = structure_typeInput.value;
+        //console.log(structure_type);
+
         const newTimer = {
             name: timerName,
+            type: structure_type,
             countdownDate: countdownDateTime,
         };
+
+
+
+
 
         timers.push(newTimer);
 
@@ -79,7 +110,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Timer ${index + 1}</h5>
-                        <p class="card-text">End Date and Time: ${endDateTime}</p>
+                        <h5 class="card-title">${timer.type}</h5>
+                        <p class="card-text">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
                     </div>
@@ -153,7 +185,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">${timer.name}</h5>
-                        <p class="card-text">End Date and Time: ${endDateTime}</p>
+                        <h5 class="card-title">${timer.type}</h5>
+                        <p class="card-text">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
                     </div>
