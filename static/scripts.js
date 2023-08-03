@@ -215,14 +215,36 @@ populateStructureTypeDropdown();
                     <div class="card-body">
                         <h5 class="card-title">${timer.name}</h5>
                         <h5 class="card-title">${timer.type}</h5>
+                        // add image source here
                         <p class="card-text">Category: ${timer.timerCat}</p>
-                        <p class="card-text">End Date: ${endDateTime}</p>
+                        <p class="card-text timer-expiry">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
                     </div>
                 </div>
             `;
-            container.appendChild(timerCard);
+            // Get the expiry date of the new timer
+            const newTimerExpiryDate = new Date(timer.countdownDate).getTime();
+
+        // Insert the new timer card in the correct position in the container based on expiry date
+            const allTimerCards = container.getElementsByClassName("col-md-4");
+            let insertionIndex = 0;
+            for (let i = 0; i < allTimerCards.length; i++) {
+                const timerCardExpiryDate = new Date(allTimerCards[i].querySelector(".timer-expiry").textContent.split(":")[1]).getTime();
+                if (newTimerExpiryDate > timerCardExpiryDate) {
+                    insertionIndex = i + 1;
+                } else {
+                    break;
+                }
+            }
+            if (insertionIndex === allTimerCards.length) {
+                container.appendChild(timerCard);
+            } else {
+                container.insertBefore(timerCard, allTimerCards[insertionIndex]);
+            }
+
+
+            //container.appendChild(timerCard);
             startCountdown(index);
         });
     }
