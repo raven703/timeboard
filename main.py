@@ -61,6 +61,15 @@ def structure_type_options():
     options = get_structure_type_options()
     return jsonify(options), 200
 
+def get_radio_button_options():
+    options = ["Offensive", "Defensive"]
+    return options
+
+@app.route('/api/radio_button_options', methods=['GET'])
+def radio_button_options():
+    options = get_radio_button_options()
+    return jsonify(options), 200
+
 
 if __name__ == '__main__':
     app.run()

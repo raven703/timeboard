@@ -19,8 +19,29 @@ function populateStructureTypeDropdown() {
             })
             .catch(error => console.error('Error fetching dropdown options:', error));
     }
+function populateRadioButtons() {
+        const radioButtonsContainer = document.getElementById("categoryContainer");
+        radioButtonsContainer.innerHTML = "";
 
+        // Fetch radio button options from the server
+        fetch('/api/radio_button_options')
+            .then(response => response.json())
+            .then(data => {
+                const options = data;
+                options.forEach(option => {
+                    const radioButton = document.createElement("div");
+                    radioButton.classList.add("form-check");
+                    radioButton.innerHTML = `
+                        <input class="form-check-input" type="radio" name="category" value="${option.toLowerCase()}" id="${option.toLowerCase()}">
+                        <label class="form-check-label" for="${option.toLowerCase()}">${option}</label>
+                    `;
+                    radioButtonsContainer.appendChild(radioButton);
+                });
+            })
+            .catch(error => console.error('Error fetching radio button options:', error));
+    }
 
+populateRadioButtons();
 populateStructureTypeDropdown();
 
   function showAutocompleteSuggestions() {
@@ -72,11 +93,18 @@ populateStructureTypeDropdown();
 
         const structure_typeInput = document.getElementById("structure_type");
         const structure_type = structure_typeInput.value;
-        //console.log(structure_type);
+
+        const selectedRadioButton = document.querySelector('input[name="category"]:checked');
+            // Check if a radio button is selected before accessing its value
+        const selectedCategoryOption = selectedRadioButton ? selectedRadioButton.value : 'N/A';
+
+
+        //console.log(selectedCategoryOption);
 
         const newTimer = {
             name: timerName,
             type: structure_type,
+            timerCat: selectedCategoryOption,
             countdownDate: countdownDateTime,
         };
 
@@ -111,6 +139,7 @@ populateStructureTypeDropdown();
                     <div class="card-body">
                         <h5 class="card-title">Timer ${index + 1}</h5>
                         <h5 class="card-title">${timer.type}</h5>
+                        <p class="card-text">Category: ${timer.timerCat}</p>
                         <p class="card-text">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
@@ -186,6 +215,7 @@ populateStructureTypeDropdown();
                     <div class="card-body">
                         <h5 class="card-title">${timer.name}</h5>
                         <h5 class="card-title">${timer.type}</h5>
+                        <p class="card-text">Category: ${timer.timerCat}</p>
                         <p class="card-text">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
