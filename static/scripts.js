@@ -110,10 +110,11 @@ populateStructureTypeDropdown();
 
         timers.push(newTimer);
 
-        displayTimers(); // Display the timers on the page
-        saveTimersToServer(); // Save timers to the server, including the new timer
 
+        saveTimersToServer(); // Save timers to the server, including the new timer
+        displayTimers(); // Display the timers on the page
         timerNameInput.value = ''; // Clear the input field after adding the timer
+        //location.reload();
     }
 
     function deleteTimer(index) {
@@ -212,6 +213,8 @@ populateStructureTypeDropdown();
         const container = document.getElementById("timers_container");
         container.innerHTML = '';
         const structureTypeDropdown = document.getElementById("structure_type");
+        // Sort the timers array by countdownDate in ascending order
+        timers.sort((a, b) => new Date(a.countdownDate) - new Date(b.countdownDate));
 
        timers.forEach((timer, index) => {
             const timerCard = document.createElement("div");

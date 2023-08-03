@@ -7,8 +7,10 @@ app = Flask(__name__)
 
 # Function to save timers to a JSON file
 def save_timers(timers):
-    with open('timers.json', 'w') as file:
-        json.dump(timers, file)
+    with open('timers.json', 'w') as json_file:
+        sorted_data = sorted(timers, key=lambda x: x["countdownDate"])
+
+        json.dump(sorted_data, json_file)
 
 # Function to load timers from the JSON file
 def load_timers():
@@ -16,7 +18,6 @@ def load_timers():
         with open('timers.json', 'r') as file:
             data_list = json.load(file)
             sorted_data = sorted(data_list, key=lambda x: x["countdownDate"])
-            print(sorted_data)
             return sorted_data
     return []
 
