@@ -130,7 +130,7 @@ populateStructureTypeDropdown();
         // Re-add cards for active timers
         timers.forEach((timer, index) => {
             const timerCard = document.createElement("div");
-            timerCard.classList.add("col-md-4", "mb-4");
+            timerCard.classList.add("col-md-3", "mb-4");
             const endDateTime = new Date(timer.countdownDate).toLocaleString();
             const selectedImageSrc = timer.type.toLowerCase();
             let color = "red"
@@ -218,7 +218,7 @@ populateStructureTypeDropdown();
 
        timers.forEach((timer, index) => {
             const timerCard = document.createElement("div");
-            timerCard.classList.add("col-md-4", "mb-4");
+            timerCard.classList.add("col-md-3", "mb-4");
             const endDateTime = new Date(timer.countdownDate).toLocaleString();
             const selectedImageSrc = timer.type.toLowerCase();
             let color = "red"
