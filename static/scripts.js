@@ -10,10 +10,11 @@ function populateStructureTypeDropdown() {
             .then(response => response.json())
             .then(data => {
                 const options = data;
-                options.forEach(option => {
+                options.forEach((option, index) => {
                     const optionElement = document.createElement('option');
                     optionElement.value = option;
                     optionElement.innerText = option;
+                    optionElement.dataset.imageSrc = `image_${index + 1}.jpg`; // Modify the image paths
                     dropdown.appendChild(optionElement);
                 });
             })
@@ -205,17 +206,19 @@ populateStructureTypeDropdown();
     function displayTimers() {
         const container = document.getElementById("timers_container");
         container.innerHTML = '';
+        const structureTypeDropdown = document.getElementById("structure_type");
 
         timers.forEach((timer, index) => {
             const timerCard = document.createElement("div");
             timerCard.classList.add("col-md-4", "mb-4");
             const endDateTime = new Date(timer.countdownDate).toLocaleString();
+            const selectedImageSrc = timer.type.toLowerCase();
             timerCard.innerHTML = `
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">${timer.name}</h5>
                         <h5 class="card-title">${timer.type}</h5>
-                        // add image source here
+                        <img src="/static/${selectedImageSrc}.jpg" alt="Structure Image" class="img-fluid">
                         <p class="card-text">Category: ${timer.timerCat}</p>
                         <p class="card-text timer-expiry">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>

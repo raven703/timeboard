@@ -56,6 +56,43 @@ def get_structure_type_options():
     ]
     return options
 
+
+structure_type_options = [
+    {
+        "name": "Astrahus",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Raitaru",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Athanor",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Fortizar",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Keepstar",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Azbel",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Sotiyo",
+        "image_link": "/static/astrahus.jpg",
+    },
+    {
+        "name": "Tatara",
+        "image_link": "/static/astrahus.jpg",
+    }
+
+]
+
 @app.route('/api/structure_type_options', methods=['GET'])
 def structure_type_options():
     options = get_structure_type_options()
