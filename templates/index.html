@@ -1,77 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Countdown Timer</title>
+    <title>Ferra Victrix simple timeboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
      <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
 
 </head>
 <body>
-<div class="container mt-5">
+<div class="container">
     <h1 class="text-center">Time Board</h1>
-    <div class="countdown-container mt-5">
-        <form id="countdown_form">
-            <div class="form-group">
+</div>
+
+    <form class="mt-5" id="countdown_form">
+            <div class="form-row align-items-center justify-content-center">
+                <div class="col-auto">
                 <label for="countdown_date">Date:</label>
                 <input type="date" class="form-control" id="countdown_date" name="countdown_date" required>
+                </div>
 
-            <div class="form-group">
+                <div class="col-auto">
                 <label for="countdown_time">Time:</label>
                 <input type="time" class="form-control" id="countdown_time" name="countdown_time" required>
-            </div>
+                </div>
 
-            </div>
-
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="timer_name">Location:</label>
+                <div class="col-auto">
+                    <label for="timer_name">Location:</label>
             <input type="text" class="form-control" id="timer_name" required="true" placeholder="Enter location here" autocomplete="off">
             <div id="autocomplete_list"></div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="structure_type">Structure Type:</label>
+                </div>
+
+                <div class="col-auto">
+                            <label for="structure_type">Structure Type:</label>
             <select class="form-control" id="structure_type">
                 <!-- Options will be dynamically populated by JavaScript -->
             </select>
-        </div>
+                </div>
 
-         <div class="form-group" id="categoryContainer">
+                <div class="col-auto">
+                         <div class="categoryContainer" id="categoryContainer">
             <label>Category:</label>
-            <div class="form-check">
+            <div class="">
                 <input class="form-check-input" type="radio" name="category" value="Offensive" id="offensive">
                 <label class="form-check-label" for="offensive">
                     Offensive
                 </label>
             </div>
-            <div class="form-check">
+            <div class="">
                 <input class="form-check-input" type="radio" name="category" value="Defensive" id="defensive">
                 <label class="form-check-label" for="defensive">
                     Defensive
                 </label>
             </div>
         </div>
+                </div>
 
 
 
-    </div>
+            </div>
+     <div class="form-row align-items-center justify-content-center">
+         <div class="col-auto">
+   <button type="submit" class="btn btn-primary mt-5">Create timer</button>
 </div>
+     </div>
 
-
-            <button type="submit" class="btn btn-primary">Create timer</button>
         </form>
-    </div>
+
 
 
     <div class="row mt-5" id="timers_container">
         <!-- Timer cards will be dynamically added here -->
     </div>
 
-</div>
+
 
 </body>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>

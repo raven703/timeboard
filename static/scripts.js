@@ -84,6 +84,7 @@ populateStructureTypeDropdown();
         const countdownTime = formData.get("countdown_time");
         const countdownDateTime = `${countdownDate} ${countdownTime}`;
         addCountdownTimer(countdownDateTime);
+
     });
 
      // Function to add a countdown timer
@@ -100,8 +101,6 @@ populateStructureTypeDropdown();
         const selectedCategoryOption = selectedRadioButton ? selectedRadioButton.value : 'N/A';
 
 
-        //console.log(selectedCategoryOption);
-
         const newTimer = {
             name: timerName,
             type: structure_type,
@@ -109,14 +108,11 @@ populateStructureTypeDropdown();
             countdownDate: countdownDateTime,
         };
 
-
-
-
-
         timers.push(newTimer);
 
         displayTimers(); // Display the timers on the page
         saveTimersToServer(); // Save timers to the server, including the new timer
+
         timerNameInput.value = ''; // Clear the input field after adding the timer
     }
 
@@ -135,13 +131,22 @@ populateStructureTypeDropdown();
             const timerCard = document.createElement("div");
             timerCard.classList.add("col-md-4", "mb-4");
             const endDateTime = new Date(timer.countdownDate).toLocaleString();
+            const selectedImageSrc = timer.type.toLowerCase();
+            let color = "red"
+            if (timer.timerCat === "offensive") {
+            color = "red";}
+            else {
+            color = "green";
+            }
             timerCard.innerHTML = `
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Timer ${index + 1}</h5>
-                        <h5 class="card-title">${timer.type}</h5>
-                        <p class="card-text">Category: ${timer.timerCat}</p>
-                        <p class="card-text">End Date: ${endDateTime}</p>
+                        <h5 class="card-title">${timer.name}</h5>
+
+                        <h5 class="card-title">${timer.type}: <span style='color: ${color}'>${timer.timerCat}</span></h5>
+                        <img src="/static/${selectedImageSrc}.jpg" alt="Structure Image" class="img-fluid rounded-circle">
+
+                        <p class="card-text timer-expiry">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
                     </div>
@@ -181,7 +186,7 @@ populateStructureTypeDropdown();
         const timerElement = document.getElementById(`timer_${index + 1}`);
         timers[index].timerElement = timerElement;
 
-        function updateCountdown() {
+    function updateCountdown() {
             const now = new Date().getTime();
             const distance = countdownDate - now;
 
@@ -208,46 +213,34 @@ populateStructureTypeDropdown();
         container.innerHTML = '';
         const structureTypeDropdown = document.getElementById("structure_type");
 
-        timers.forEach((timer, index) => {
+       timers.forEach((timer, index) => {
             const timerCard = document.createElement("div");
             timerCard.classList.add("col-md-4", "mb-4");
             const endDateTime = new Date(timer.countdownDate).toLocaleString();
             const selectedImageSrc = timer.type.toLowerCase();
+            let color = "red"
+            if (timer.timerCat === "offensive") {
+            color = "red";}
+            else {
+            color = "green";
+            }
             timerCard.innerHTML = `
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">${timer.name}</h5>
-                        <h5 class="card-title">${timer.type}</h5>
-                        <img src="/static/${selectedImageSrc}.jpg" alt="Structure Image" class="img-fluid">
-                        <p class="card-text">Category: ${timer.timerCat}</p>
+
+                        <h5 class="card-title">${timer.type}: <span style='color: ${color}'>${timer.timerCat}</span></h5>
+                        <img src="/static/${selectedImageSrc}.jpg" alt="Structure Image" class="img-fluid rounded-circle">
+
                         <p class="card-text timer-expiry">End Date: ${endDateTime}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
                     </div>
                 </div>
             `;
-            // Get the expiry date of the new timer
-            const newTimerExpiryDate = new Date(timer.countdownDate).getTime();
-
-        // Insert the new timer card in the correct position in the container based on expiry date
-            const allTimerCards = container.getElementsByClassName("col-md-4");
-            let insertionIndex = 0;
-            for (let i = 0; i < allTimerCards.length; i++) {
-                const timerCardExpiryDate = new Date(allTimerCards[i].querySelector(".timer-expiry").textContent.split(":")[1]).getTime();
-                if (newTimerExpiryDate > timerCardExpiryDate) {
-                    insertionIndex = i + 1;
-                } else {
-                    break;
-                }
-            }
-            if (insertionIndex === allTimerCards.length) {
-                container.appendChild(timerCard);
-            } else {
-                container.insertBefore(timerCard, allTimerCards[insertionIndex]);
-            }
 
 
-            //container.appendChild(timerCard);
+            container.appendChild(timerCard);
             startCountdown(index);
         });
     }

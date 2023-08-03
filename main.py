@@ -14,7 +14,10 @@ def save_timers(timers):
 def load_timers():
     if os.path.exists('timers.json'):
         with open('timers.json', 'r') as file:
-            return json.load(file)
+            data_list = json.load(file)
+            sorted_data = sorted(data_list, key=lambda x: x["countdownDate"])
+            print(sorted_data)
+            return sorted_data
     return []
 
 def read_autocomplete_strings():

@@ -4,8 +4,14 @@
             align-items: center;
         }
         .card {
-            height: 250px;
+            /*height: 250px;*/
         }
+
+.categoryContainer {
+	margin-top: 30px;
+	padding-left: 0.5rem;
+}
+
 
     #timer_name {
         width: 100%;
@@ -23,8 +29,8 @@
         border: 1px solid #ccc;
         max-height: 150px;
         overflow-y: auto;
-        width: calc(200% - 40px); /* Adjust width as needed */
-        font-size: 14px; /* Adjust font size as needed */
+
+        font-size: 14px;
     }
 
     .autocomplete-item {
