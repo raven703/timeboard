@@ -1,11 +1,78 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, session, url_for
+import requests
 import json
 import os
 
 app = Flask(__name__)
 
+app.secret_key = os.urandom(24)  # Set a secret key for session management
+
+EVE_SSO_CLIENT_ID = "ba546cd9646e457d81ecbffa73aa39f7"
+EVE_SSO_CLIENT_SECRET = "8ciYeRQnjA8XnCl6dQRBlSJfLmEoKBUsRlzNtmyT"
+EVE_SSO_CALLBACK_URL = "http%3A%2F%2Flocalhost%2Fsso%2Fcallback"
+
+
 
 # Function to save timers to a JSON file
+@app.route('/login')
+def login():
+    # Redirect the user to EVE Online's SSO login page
+
+
+    sso_url = f"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={EVE_SSO_CALLBACK_URL}" \
+              f"&client_id={EVE_SSO_CLIENT_ID}&state=ssdfghhtf34"
+    return redirect(sso_url)
+
+@app.route('/logout')
+def logout():
+    session.pop('access_token', None)
+    return redirect(url_for('index'))
+
+@app.route('/sso/callback')
+def sso_callback():
+    code = request.args.get('code')
+    print(code)
+    if code:
+        # Exchange the authorization code for an access token
+        token_url = "https://login.eveonline.com/v2/oauth/token"
+        token_payload = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "client_id": EVE_SSO_CLIENT_ID,
+            "client_secret": EVE_SSO_CLIENT_SECRET,
+        }
+        response = requests.post(token_url, data=token_payload)
+
+        if response.status_code == 200:
+            access_token = response.json().get('access_token')
+            session['access_token'] = access_token  # Store the access token in the session
+            return redirect(url_for('index'))
+        else:
+            return "Authentication failed."
+    else:
+        return jsonify("Authentication failed.")
+
+@app.route('/auth', methods=['GET'])
+def auth():
+    if 'access_token' not in session:
+        return jsonify({'data': 'False'}), 401
+    else:
+        return jsonify({'data': 'True'}), 200
+
+@app.route('/api/timers', methods=['GET', 'POST'])
+def timers():
+    if 'access_token' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    if request.method == 'POST':
+        data = request.json
+        timers = data.get('timers', [])
+        save_timers(timers)  # Save timers to the server whenever a new timer is added or deleted
+        return jsonify({'message': 'Timers saved successfully!'}), 200
+    elif request.method == 'GET':
+        timers = load_timers()
+        return jsonify(timers), 200
+
 def save_timers(timers):
     with open('timers.json', 'w') as json_file:
         sorted_data = sorted(timers, key=lambda x: x["countdownDate"])
@@ -35,16 +102,8 @@ def autocomplete():
     autocomplete_strings = read_autocomplete_strings()
     return jsonify(autocomplete_strings), 200
 
-@app.route('/api/timers', methods=['GET', 'POST'])
-def timers():
-    if request.method == 'POST':
-        data = request.json
-        timers = data.get('timers', [])
-        save_timers(timers)  # Save timers to the server whenever a new timer is added or deleted
-        return jsonify({'message': 'Timers saved successfully!'}), 200
-    elif request.method == 'GET':
-        timers = load_timers()
-        return jsonify(timers), 200
+
+
 
 # Function to get the dropdown options for the structure_type field
 def get_structure_type_options():
@@ -113,4 +172,4 @@ def radio_button_options():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=80)

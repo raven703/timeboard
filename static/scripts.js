@@ -1,6 +1,7 @@
 
    let timers = [];
 
+
     // Function to populate the structure_type dropdown
 function populateStructureTypeDropdown() {
         const dropdown = document.getElementById('structure_type');
@@ -44,6 +45,30 @@ function populateRadioButtons() {
 
 populateRadioButtons();
 populateStructureTypeDropdown();
+
+
+// Function to check if the user is authenticated
+async function checkAuthentication() {
+  try {
+    const response = await fetch('/auth', {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.data === 'True'; // Return true if authenticated, false otherwise
+    } else if (response.status === 401) {
+      return false; // User is not authenticated
+    } else {
+      throw new Error('Something went wrong!');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return false; // Handle errors by returning false
+  }
+}
+
 
   function showAutocompleteSuggestions() {
         const input = document.getElementById('timer_name');
@@ -210,6 +235,11 @@ populateStructureTypeDropdown();
 
  // Function to display timers on the web page
     function displayTimers() {
+
+ // Call the function to check authentication status
+    checkAuthentication().then(isAuthenticated => {
+      if (isAuthenticated) {
+        console.log('User is authenticated!');
         const container = document.getElementById("timers_container");
         container.innerHTML = '';
         const structureTypeDropdown = document.getElementById("structure_type");
@@ -246,6 +276,18 @@ populateStructureTypeDropdown();
             container.appendChild(timerCard);
             startCountdown(index);
         });
+
+
+        // Do something for authenticated users
+      } else {
+        console.log('User is not authenticated!');
+
+        // Do something for non-authenticated users
+
+      }});
+
+
+
     }
 
 
@@ -266,6 +308,10 @@ populateStructureTypeDropdown();
 
     // Function to load timers from the server using fetch API
     function loadTimersFromServer() {
+
+        checkAuthentication().then(isAuthenticated => {
+      if (isAuthenticated) {
+        console.log('User is authenticated!');
         fetch('/api/timers')
             .then(response => response.json())
             .then(data => {
@@ -273,6 +319,34 @@ populateStructureTypeDropdown();
                 displayTimers(); // Display the loaded timers on the page
             })
             .catch(error => console.error('Error loading timers:', error));
+        // Do something for authenticated users
+      } else {
+        console.log('User is not authenticated!');
+
+        const container = document.getElementById("login_button");
+        var linkElement = document.createElement('a');
+        linkElement.href = '/login'; // Replace with the actual URL
+
+        // 3. Create an image element
+        let imageElement = document.createElement('img');
+
+// 4. Apply class and source to the image element
+imageElement.classList.add('rounded-image');
+
+        container.innerHTML = '';
+
+        imageElement.classList.add('img-fluid');
+        imageElement.src = 'static/eve-sso-login-white-large.png'; // Replace with the actual image path
+// 5. Append the image element to the anchor element
+linkElement.appendChild(imageElement);
+// 4. Append the image element to the div's inner HTML
+    container.appendChild(linkElement);
+
+        // Do something for non-authenticated users
+
+      }});
+
+
     }
 
         document.getElementById('timer_name').addEventListener('input', () => {
