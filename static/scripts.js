@@ -123,7 +123,7 @@ async function checkAuthentication() {
 
         const userNameAuth = document.getElementById("username");
         const username = userNameAuth.innerHTML;
-        console.log(username)
+
 
         const selectedRadioButton = document.querySelector('input[name="category"]:checked');
             // Check if a radio button is selected before accessing its value
@@ -163,6 +163,7 @@ async function checkAuthentication() {
             timerCard.classList.add("col-md-3", "mb-4");
             const endDateTime = new Date(timer.countdownDate).toLocaleString();
             const selectedImageSrc = timer.type.toLowerCase();
+            let userName = timer.authUserName;
             let color = "red"
             if (timer.timerCat === "offensive") {
             color = "red";}
@@ -178,6 +179,7 @@ async function checkAuthentication() {
                         <img src="/static/${selectedImageSrc}.jpg" alt="Structure Image" class="img-fluid rounded-circle">
 
                         <p class="card-text timer-expiry">End Date: ${endDateTime}</p>
+                        <p class="card-text">By: ${userName}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
                         <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
                     </div>
