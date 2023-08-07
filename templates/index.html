@@ -12,7 +12,7 @@
     <div class="user-info">
         <!-- Check if user is authenticated -->
     {% if authenticated %}
-        <h5> Logged in as: {{CharacterName}}</h5>
+        <h5> Logged in as: <div id="username">{{CharacterName}}</div></h5>
         <!-- Show logout link -->
         <a href="/logout">Logout</a>
     {% else %}

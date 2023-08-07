@@ -7,9 +7,9 @@ app = Flask(__name__)
 
 app.secret_key = os.urandom(24)  # Set a secret key for session management
 
-EVE_SSO_CLIENT_ID = "ba546cd9646e457d81ecbffa73aa39f7"
-EVE_SSO_CLIENT_SECRET = "8ciYeRQnjA8XnCl6dQRBlSJfLmEoKBUsRlzNtmyT"
-EVE_SSO_CALLBACK_URL = "http%3A%2F%2Flocalhost%2Fsso%2Fcallback"
+EVE_SSO_CLIENT_ID = "e4213c0567c74e25b322140565be55b6 "
+EVE_SSO_CLIENT_SECRET = "89NNXp8UqfsmrCsjLgaQr3KV2qOpuC5mXMVjjAEd"
+EVE_SSO_CALLBACK_URL = "http://localhost/sso/callback"
 
 
 
