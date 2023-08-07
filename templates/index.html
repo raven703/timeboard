@@ -9,6 +9,19 @@
 </head>
 <body>
 <div class="container">
+    <div class="user-info">
+        <!-- Check if user is authenticated -->
+    {% if authenticated %}
+        <h5> Logged in as: {{CharacterName}}</h5>
+        <!-- Show logout link -->
+        <a href="/logout">Logout</a>
+    {% else %}
+        <h5> {{CharacterName}}</h5>
+
+        <!-- Show login link or login form -->
+    {% endif %}
+    </div>
+
     <h1 class="text-center">Ferra Victrix:</h1>
     <h3 class="text-center">A simple timeboard</h3>
 </div>

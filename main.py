@@ -13,11 +13,11 @@ EVE_SSO_CALLBACK_URL = "http%3A%2F%2Flocalhost%2Fsso%2Fcallback"
 
 
 
+
 # Function to save timers to a JSON file
 @app.route('/login')
 def login():
     # Redirect the user to EVE Online's SSO login page
-
 
     sso_url = f"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={EVE_SSO_CALLBACK_URL}" \
               f"&client_id={EVE_SSO_CLIENT_ID}&state=ssdfghhtf34"
@@ -31,7 +31,7 @@ def logout():
 @app.route('/sso/callback')
 def sso_callback():
     code = request.args.get('code')
-    print(code)
+
     if code:
         # Exchange the authorization code for an access token
         token_url = "https://login.eveonline.com/v2/oauth/token"
@@ -54,10 +54,22 @@ def sso_callback():
 
 @app.route('/auth', methods=['GET'])
 def auth():
+    with open("users.json", "r") as json_file:
+        allowed_users = json.load(json_file)
+
     if 'access_token' not in session:
         return jsonify({'data': 'False'}), 401
     else:
-        return jsonify({'data': 'True'}), 200
+        url = "https://login.eveonline.com/oauth/verify"
+        headers = {
+            "Authorization": f"Bearer {session['access_token']}"
+        }
+        result = json.loads(requests.get(url, headers=headers).text)
+        if result['CharacterName'] in allowed_users:
+            return jsonify({'data': 'True'}), 200
+        else:
+            return jsonify({'data': 'False'}), 401
+
 
 @app.route('/api/timers', methods=['GET', 'POST'])
 def timers():
@@ -95,8 +107,29 @@ def read_autocomplete_strings():
 @app.route('/')
 def index():
     timers = load_timers()  # Load timers from the server on page load
-    return render_template('index.html', timers=timers)
+    with open("users.json", "r") as json_file:
+        allowed_users = json.load(json_file)
 
+
+    if 'access_token' not in session:
+        authenticated = False
+        return render_template('index.html', timers=timers, authenticated=authenticated,
+                               CharacterName="Please login to view timers.")
+    else:
+         # print(session['access_token'])
+        url = "https://login.eveonline.com/oauth/verify"
+        headers = {
+            "Authorization": f"Bearer {session['access_token']}"
+        }
+        result = json.loads(requests.get(url, headers=headers).text)
+        if result['CharacterName'] in allowed_users:
+            authenticated = True
+            #print(result['CharacterName'])
+            return render_template('index.html', timers=timers, authenticated=authenticated, CharacterName=result['CharacterName'])
+        else:
+            authenticated = False
+            return render_template('index.html', timers=timers, authenticated=authenticated,
+                                   CharacterName=f"{result['CharacterName']} is not allowed to view timers.")
 @app.route('/api/autocomplete', methods=['GET'])
 def autocomplete():
     autocomplete_strings = read_autocomplete_strings()
