@@ -4,23 +4,19 @@
 
     // Function to populate the structure_type dropdown
 function populateStructureTypeDropdown() {
-        const dropdown = document.getElementById('structure_type');
+    const dropdown = document.getElementById('structure_type');
 
-        // Fetch dropdown options from the server
-        fetch('/api/structure_type_options')
-            .then(response => response.json())
-            .then(data => {
-                const options = data;
-                options.forEach((option, index) => {
-                    const optionElement = document.createElement('option');
-                    optionElement.value = option;
-                    optionElement.innerText = option;
-                    optionElement.dataset.imageSrc = `image_${index + 1}.jpg`; // Modify the image paths
-                    dropdown.appendChild(optionElement);
-                });
-            })
-            .catch(error => console.error('Error fetching dropdown options:', error));
-    }
+    fetch('/api/structure_type_options')
+        .then(response => response.json())
+        .then(data => {
+            const optionsHTML = data.map((option, index) => {
+                return `<option value="${option}" data-image-src="image_${index + 1}.jpg">${option}</option>`;
+            }).join('');
+            dropdown.innerHTML = optionsHTML;
+        })
+        .catch(error => console.error('Error fetching dropdown options:', error));
+}
+
 function populateRadioButtons() {
         const radioButtonsContainer = document.getElementById("categoryContainer");
         radioButtonsContainer.innerHTML = "";
@@ -152,48 +148,9 @@ async function checkAuthentication() {
         timerCard.remove(); // Remove the entire timer card and its content from the DOM
         clearInterval(timers[index].countdownInterval);
         timers.splice(index, 1);
-        updateTimerTitles(); // Update the Timer titles after deletion
-
-        const container = document.getElementById("timers_container");
-        container.innerHTML = ''; // Clear all existing cards
-
-        // Re-add cards for active timers
-        timers.forEach((timer, index) => {
-            const timerCard = document.createElement("div");
-            timerCard.classList.add("col-md-3", "mb-4");
-            const endDateTime = new Date(timer.countdownDate).toLocaleString();
-            const selectedImageSrc = timer.type.toLowerCase();
-            let userName = timer.authUserName;
-            let color = "red"
-            if (timer.timerCat === "offensive") {
-            color = "red";}
-            else {
-            color = "green";
-            }
-            timerCard.innerHTML = `
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">${timer.name}</h5>
-
-                        <h5 class="card-title">${timer.type}: <span style='color: ${color}'>${timer.timerCat}</span></h5>
-                        <img src="/static/${selectedImageSrc}.jpg" alt="Structure Image" class="img-fluid rounded-circle">
-
-                        <p class="card-text timer-expiry">End Date: ${endDateTime}</p>
-                        <p class="card-text">By: ${userName}</p>
-                        <h3 class="card-text" id="timer_${index + 1}"></h3>
-                        <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
-                    </div>
-                </div>
-            `;
-
-            container.appendChild(timerCard);
-
-            startCountdown(index); // Restart countdown for the remaining timers
-                    // Save timers to the server each time a timer is deleted
+        displayTimers();
         saveTimersToServer();
-        });
-
-        removeEmptyCards(); // Remove any empty cards from the DOM
+       // removeEmptyCards(); // Remove any empty cards from the DOM
     }
 
     function removeEmptyCards() {
