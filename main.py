@@ -12,8 +12,6 @@ EVE_SSO_CLIENT_SECRET = "89NNXp8UqfsmrCsjLgaQr3KV2qOpuC5mXMVjjAEd"
 EVE_SSO_CALLBACK_URL = "http://localhost/sso/callback"
 
 
-
-
 # Function to save timers to a JSON file
 @app.route('/login')
 def login():
@@ -23,10 +21,12 @@ def login():
               f"&client_id={EVE_SSO_CLIENT_ID}&state=ssdfghhtf34"
     return redirect(sso_url)
 
+
 @app.route('/logout')
 def logout():
     session.pop('access_token', None)
     return redirect(url_for('index'))
+
 
 @app.route('/sso/callback')
 def sso_callback():
@@ -52,6 +52,7 @@ def sso_callback():
     else:
         return jsonify("Authentication failed.")
 
+
 @app.route('/auth', methods=['GET'])
 def auth():
     with open("users.json", "r") as json_file:
@@ -71,6 +72,41 @@ def auth():
             return jsonify({'data': 'False'}), 401
 
 
+
+
+
+@app.route('/api/create_timer', methods=['POST'])
+def send_discord_notification():
+    if 'access_token' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    webhook_url = "https://discord.com/api/webhooks/1139083310975422544/Q26ZUptKCrl51Kgsvr1RDyMLv2jjIZrEvMUklEpB1q8eaHsNLat3y6_0bKRYXkFb9fY4"
+
+    data2 = request.json['timer_name']
+    timer_name = data2['name']
+    type = data2['type']
+    category = data2['timerCat']
+    date = data2['countdownDate']
+    author = data2['authUserName']
+
+    # print(data2)
+    content = f'New timer created:\n**System:** {timer_name}\n**Type:** {type}' \
+              f'\n**Category:** {category}\n**Date:** {date}\n**Created:** {author} '
+    data = {
+        'content': content
+    }
+    response = requests.post(webhook_url, json=data)
+
+
+    if response.status_code == 204:
+        print("Notification sent successfully")
+        return jsonify({'message': 'Timer send to discord channel.'}), 200
+    else:
+        print("Failed to send notification")
+        return jsonify({'message': 'Timer failed.'}), 501
+
+
+
 @app.route('/api/timers', methods=['GET', 'POST'])
 def timers():
     if 'access_token' not in session:
@@ -85,11 +121,13 @@ def timers():
         timers = load_timers()
         return jsonify(timers), 200
 
+
 def save_timers(timers):
     with open('timers.json', 'w') as json_file:
         sorted_data = sorted(timers, key=lambda x: x["countdownDate"])
 
         json.dump(sorted_data, json_file)
+
 
 # Function to load timers from the JSON file
 def load_timers():
@@ -100,9 +138,11 @@ def load_timers():
             return sorted_data
     return []
 
+
 def read_autocomplete_strings():
     with open('autocomplete_strings.txt', 'r') as file:
         return [line.strip() for line in file]
+
 
 @app.route('/')
 def index():
@@ -110,13 +150,12 @@ def index():
     with open("users.json", "r") as json_file:
         allowed_users = json.load(json_file)
 
-
     if 'access_token' not in session:
         authenticated = False
         return render_template('index.html', timers=timers, authenticated=authenticated,
                                CharacterName="Please login to view timers.")
     else:
-         # print(session['access_token'])
+        # print(session['access_token'])
         url = "https://login.eveonline.com/oauth/verify"
         headers = {
             "Authorization": f"Bearer {session['access_token']}"
@@ -124,18 +163,19 @@ def index():
         result = json.loads(requests.get(url, headers=headers).text)
         if result['CharacterName'] in allowed_users:
             authenticated = True
-            #print(result['CharacterName'])
-            return render_template('index.html', timers=timers, authenticated=authenticated, CharacterName=result['CharacterName'])
+            # print(result['CharacterName'])
+            return render_template('index.html', timers=timers, authenticated=authenticated,
+                                   CharacterName=result['CharacterName'])
         else:
             authenticated = False
             return render_template('index.html', timers=timers, authenticated=authenticated,
                                    CharacterName=f"{result['CharacterName']} is not allowed to view timers.")
+
+
 @app.route('/api/autocomplete', methods=['GET'])
 def autocomplete():
     autocomplete_strings = read_autocomplete_strings()
     return jsonify(autocomplete_strings), 200
-
-
 
 
 # Function to get the dropdown options for the structure_type field
@@ -189,14 +229,17 @@ structure_type_options = [
 
 ]
 
+
 @app.route('/api/structure_type_options', methods=['GET'])
 def structure_type_options():
     options = get_structure_type_options()
     return jsonify(options), 200
 
+
 def get_radio_button_options():
     options = ["Offensive", "Defensive"]
     return options
+
 
 @app.route('/api/radio_button_options', methods=['GET'])
 def radio_button_options():

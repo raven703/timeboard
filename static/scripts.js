@@ -4,40 +4,49 @@
 
     // Function to populate the structure_type dropdown
 function populateStructureTypeDropdown() {
-    const dropdown = document.getElementById('structure_type');
+    const dropdown = $('#structure_type');
 
-    fetch('/api/structure_type_options')
-        .then(response => response.json())
-        .then(data => {
+    $.ajax({
+        url: '/api/structure_type_options',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
             const optionsHTML = data.map((option, index) => {
                 return `<option value="${option}" data-image-src="image_${index + 1}.jpg">${option}</option>`;
             }).join('');
-            dropdown.innerHTML = optionsHTML;
-        })
-        .catch(error => console.error('Error fetching dropdown options:', error));
+            dropdown.html(optionsHTML);
+        },
+        error: function(error) {
+            console.error('Error fetching dropdown options:', error);
+        }
+    });
 }
 
 function populateRadioButtons() {
-        const radioButtonsContainer = document.getElementById("categoryContainer");
-        radioButtonsContainer.innerHTML = "";
+    const radioButtonsContainer = $("#categoryContainer");
+    radioButtonsContainer.empty();
 
-        // Fetch radio button options from the server
-        fetch('/api/radio_button_options')
-            .then(response => response.json())
-            .then(data => {
-                const options = data;
-                options.forEach(option => {
-                    const radioButton = document.createElement("div");
-                    radioButton.classList.add("form-check");
-                    radioButton.innerHTML = `
-                        <input class="form-check-input" type="radio" name="category" value="${option.toLowerCase()}" id="${option.toLowerCase()}">
-                        <label class="form-check-label" for="${option.toLowerCase()}">${option}</label>
-                    `;
-                    radioButtonsContainer.appendChild(radioButton);
-                });
-            })
-            .catch(error => console.error('Error fetching radio button options:', error));
-    }
+    // Fetch radio button options from the server
+    $.ajax({
+        url: '/api/radio_button_options',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            const options = data;
+            options.forEach(option => {
+                const radioButton = $("<div>").addClass("form-check");
+                radioButton.html(`
+                    <input class="form-check-input" type="radio" name="category" value="${option.toLowerCase()}" id="${option.toLowerCase()}">
+                    <label class="form-check-label" for="${option.toLowerCase()}">${option}</label>
+                `);
+                radioButtonsContainer.append(radioButton);
+            });
+        },
+        error: function(error) {
+            console.error('Error fetching radio button options:', error);
+        }
+    });
+}
 
 populateRadioButtons();
 populateStructureTypeDropdown();
@@ -135,6 +144,20 @@ async function checkAuthentication() {
         };
 
         timers.push(newTimer);
+
+        $.ajax({
+            type: 'POST',
+            url: '/api/create_timer',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'timer_name': newTimer }),
+            success: function(data) {
+                console.log('Timer created successfully');
+            }
+        });
+
+
+
+
 
 
         saveTimersToServer(); // Save timers to the server, including the new timer
