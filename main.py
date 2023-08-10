@@ -80,7 +80,7 @@ def send_discord_notification():
     if 'access_token' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
 
-    webhook_url = "https://discord.com/api/webhooks/1139083310975422544/Q26ZUptKCrl51Kgsvr1RDyMLv2jjIZrEvMUklEpB1q8eaHsNLat3y6_0bKRYXkFb9fY4"
+    webhook_url = "place webhook here"
 
     data2 = request.json['timer_name']
     timer_name = data2['name']
