@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, jsonify, redirect, session, u
 import requests
 import json
 import os
+from user_db import UsersDb
 
 app = Flask(__name__)
+usersDB = UsersDb()
 
 app.secret_key = os.urandom(24)  # Set a secret key for session management
 
@@ -18,7 +20,9 @@ def login():
     # Redirect the user to EVE Online's SSO login page
 
     sso_url = f"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={EVE_SSO_CALLBACK_URL}" \
-              f"&client_id={EVE_SSO_CLIENT_ID}&state=ssdfghhtf34"
+              f"&client_id={EVE_SSO_CLIENT_ID}&scope=esi-characters.read_notifications.v1&state=ssdfghhtf34"
+
+
     return redirect(sso_url)
 
 
@@ -46,6 +50,30 @@ def sso_callback():
         if response.status_code == 200:
             access_token = response.json().get('access_token')
             session['access_token'] = access_token  # Store the access token in the session
+
+            # get char ID from CCP
+            url = "https://login.eveonline.com/oauth/verify"
+            headers = {
+                "Authorization": f"Bearer {session['access_token']}"
+            }
+            result = json.loads(requests.get(url, headers=headers).text)
+
+            url = f"https://esi.evetech.net/latest/characters/{result['CharacterID']}/?datasource=tranquility"
+            headers = {
+                "accept": "application/json",
+                "Cache-Control": "no-cache"
+            }
+            response = requests.get(url, headers=headers).json()  # get alliance info from ccp with char ID
+
+            if not usersDB.get(result['CharacterID']):
+                usersDB.add(result['CharacterID'], result['CharacterName'], response['alliance_id'])
+
+            session['CharacterID'] = str(result['CharacterID'])
+            session['char_alliance'] = str(response['alliance_id'])
+            session['CharacterName'] = str(result['CharacterName'])
+
+
+
             return redirect(url_for('index'))
         else:
             return "Authentication failed."
@@ -61,24 +89,32 @@ def auth():
     if 'access_token' not in session:
         return jsonify({'data': 'False'}), 401
     else:
-        url = "https://login.eveonline.com/oauth/verify"
-        headers = {
-            "Authorization": f"Bearer {session['access_token']}"
-        }
-        result = json.loads(requests.get(url, headers=headers).text)
-        if result['CharacterName'] in allowed_users:
+        usersDB.load()
+
+        if usersDB.get(session['CharacterID'])['char_alliance'] in allowed_users:
             return jsonify({'data': 'True'}), 200
         else:
             return jsonify({'data': 'False'}), 401
 
 
+@app.route('/api/structures', methods=['GET', 'POST'])
+def get_structure_info():
+    if 'access_token' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    ESI_BASE_URL = 'https://esi.evetech.net/latest'
+    ID = '91704704'
+    # endpoint = f'/corporations/98524122/structures/'
+    endpoint = f'/characters/{ID}/notifications/'
+    headers = {'Authorization': f'Bearer {session["access_token"]}'}
+    response = requests.get(ESI_BASE_URL + endpoint, headers=headers)
+
+    return jsonify(response.text), 200
 
 
 
 @app.route('/api/create_timer', methods=['POST'])
 def send_discord_notification():
-    if 'access_token' not in session:
-        return jsonify({'error': 'Not authenticated'}), 401
+
 
     webhook_url = "place webhook here"
 
@@ -89,7 +125,7 @@ def send_discord_notification():
     date = data2['countdownDate']
     author = data2['authUserName']
 
-    # print(data2)
+
     content = f'New timer created:\n**System:** {timer_name}\n**Type:** {type}' \
               f'\n**Category:** {category}\n**Date:** {date}\n**Created:** {author} '
     data = {
@@ -146,30 +182,28 @@ def read_autocomplete_strings():
 
 @app.route('/')
 def index():
-    timers = load_timers()  # Load timers from the server on page load
+
     with open("users.json", "r") as json_file:
         allowed_users = json.load(json_file)
 
     if 'access_token' not in session:
         authenticated = False
-        return render_template('index.html', timers=timers, authenticated=authenticated,
+        return render_template('index.html', timers=None, authenticated=authenticated,
                                CharacterName="Please login to view timers.")
     else:
-        # print(session['access_token'])
-        url = "https://login.eveonline.com/oauth/verify"
-        headers = {
-            "Authorization": f"Bearer {session['access_token']}"
-        }
-        result = json.loads(requests.get(url, headers=headers).text)
-        if result['CharacterName'] in allowed_users:
+
+        usersDB.load()
+
+        if usersDB.get(session['CharacterID'])['char_alliance'] in allowed_users:
             authenticated = True
-            # print(result['CharacterName'])
+            timers = load_timers()  # Load timers from the server on page load
+
             return render_template('index.html', timers=timers, authenticated=authenticated,
-                                   CharacterName=result['CharacterName'])
+                                   CharacterName=session['CharacterName'])
         else:
             authenticated = False
-            return render_template('index.html', timers=timers, authenticated=authenticated,
-                                   CharacterName=f"{result['CharacterName']} is not allowed to view timers.")
+            return render_template('index.html', timers=None, authenticated=authenticated,
+                                   CharacterName=f"{session['CharacterName']} is not allowed to view timers.")
 
 
 @app.route('/api/autocomplete', methods=['GET'])
