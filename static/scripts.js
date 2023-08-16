@@ -62,6 +62,10 @@ async function checkAuthentication() {
 
     if (response.ok) {
       const data = await response.json();
+        if (data.data === '1') {
+        return data.data; // Return '1' if authenticated with value '1'
+      }
+
       return data.data === 'True'; // Return true if authenticated, false otherwise
     } else if (response.status === 401) {
       return false; // User is not authenticated
@@ -113,9 +117,12 @@ async function checkAuthentication() {
         const countdownDate = formData.get("countdown_date");
         const countdownTime = formData.get("countdown_time");
         const countdownDateTime = `${countdownDate} ${countdownTime}`;
-        addCountdownTimer(countdownDateTime);
 
-    });
+        checkAuthentication().then(isAuthenticated => {
+        if (isAuthenticated === "1") {
+            addCountdownTimer(countdownDateTime);}
+                });
+        });
 
      // Function to add a countdown timer
     function addCountdownTimer(countdownDateTime) {
@@ -154,16 +161,10 @@ async function checkAuthentication() {
                 console.log('Timer created successfully');
             }
         });
-
-
-
-
-
-
         saveTimersToServer(); // Save timers to the server, including the new timer
         displayTimers(); // Display the timers on the page
         timerNameInput.value = ''; // Clear the input field after adding the timer
-        //location.reload();
+
     }
 
     function deleteTimer(index) {
@@ -225,14 +226,15 @@ async function checkAuthentication() {
 
  // Call the function to check authentication status
     checkAuthentication().then(isAuthenticated => {
-      if (isAuthenticated) {
-        console.log('User is authenticated!');
+      if (isAuthenticated || isAuthenticated === 1) {
+        //console.log('User is authenticated!');
         const container = document.getElementById("timers_container");
         container.innerHTML = '';
         const structureTypeDropdown = document.getElementById("structure_type");
         // Sort the timers array by countdownDate in ascending order
         timers.sort((a, b) => new Date(a.countdownDate) - new Date(b.countdownDate));
-
+        console.log(isAuthenticated);
+        console.log(isAuthenticated === "1");
        timers.forEach((timer, index) => {
             const timerCard = document.createElement("div");
             timerCard.classList.add("col-md-3", "mb-4");
@@ -257,7 +259,7 @@ async function checkAuthentication() {
 
                         <p class="card-text">By: ${userName}</p>
                         <h3 class="card-text" id="timer_${index + 1}"></h3>
-                        <button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>
+                        ${isAuthenticated === "1" ? `<button class="btn btn-danger" onclick="deleteTimer(${index})">Delete</button>` : ''}
                     </div>
                 </div>
             `;

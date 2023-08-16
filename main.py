@@ -91,8 +91,15 @@ def auth():
     else:
         usersDB.load()
 
+        if usersDB.get(session['CharacterID'])['char_name'] in allowed_users:
+            return jsonify({'data': '1'}), 200
+            print(jsonify({'data': '1'}))
+
         if usersDB.get(session['CharacterID'])['char_alliance'] in allowed_users:
             return jsonify({'data': 'True'}), 200
+
+
+
         else:
             return jsonify({'data': 'False'}), 401
 
@@ -112,12 +119,9 @@ def get_structure_info():
 
 
 
-@app.route('/api/create_timer', methods=['POST'])
+@app.route('/api/create_timer', methods=['POST']) # method for discord post
 def send_discord_notification():
-
-
     webhook_url = "place webhook here"
-
     data2 = request.json['timer_name']
     timer_name = data2['name']
     type = data2['type']
